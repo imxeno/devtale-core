@@ -88,7 +88,7 @@ template<typename T> void rpc_poke(websocket::stream<tcp::socket>& ws, json req,
 	const T value = utils::hex_string_to_dword(params[1]);
 	*reinterpret_cast<T*>(address) = value;
 
-	ws.write(boost::asio::buffer(jsonrpc::rpc_result(sizeof(T), id)));
+	ws.write(boost::asio::buffer(jsonrpc::rpc_result(utils::dword_to_hex_string(sizeof(T)), id)));
 }
 
 void rpc_ntpvm(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
@@ -160,7 +160,7 @@ void rpc_write(websocket::stream<tcp::socket>& ws, json req, json::value_type id
 	const auto bytes = utils::hex_string_to_bytes(params[1]);
 	memcpy_s(reinterpret_cast<void*>(address), bytes.size(), &bytes[0], bytes.size());
 
-	ws.write(boost::asio::buffer(jsonrpc::rpc_result(bytes.size(), id)));
+	ws.write(boost::asio::buffer(jsonrpc::rpc_result(utils::dword_to_hex_string(bytes.size()), id)));
 }
 
 
