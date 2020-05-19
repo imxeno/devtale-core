@@ -88,7 +88,7 @@ template<typename T> void rpc_poke(websocket::stream<tcp::socket>& ws, json req,
 	const T value = utils::hex_string_to_dword(params[1]);
 	*reinterpret_cast<T*>(address) = value;
 
-	ws.write(boost::asio::buffer(jsonrpc::rpc_result(params[1], id)));
+	ws.write(boost::asio::buffer(jsonrpc::rpc_result(sizeof(T), id)));
 }
 
 void rpc_ntpvm(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
@@ -116,6 +116,53 @@ void rpc_ntpvm(websocket::stream<tcp::socket>& ws, json req, json::value_type id
 	ws.write(boost::asio::buffer(jsonrpc::rpc_result(utils::dword_to_hex_string(oldProtect), id)));
 }
 
+void rpc_read(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
+{
+	if (!req.count("params"))
+	{
+		ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_INVALID_PARAMS, "params are required for this method", id)));
+		return;
+	}
+	const auto params = req["params"].get<std::vector<std::string>>();
+
+	if (params.size() != 2)
+	{
+		ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_INVALID_PARAMS, "this method expects 2 params", id)));
+		return;
+	}
+
+	const DWORD address = utils::hex_string_to_dword(params[0]);
+	const DWORD length = utils::hex_string_to_dword(params[1]);
+	std::vector<char> buffer(length + 1);
+	memcpy_s(&buffer[0], buffer.size(), reinterpret_cast<void*>(address), length);
+	buffer[length] = 0;
+	const auto bytes = "0x" + boost::algorithm::hex(std::string(&buffer[0]));
+
+	ws.write(boost::asio::buffer(jsonrpc::rpc_result(bytes, id)));
+}
+
+void rpc_write(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
+{
+	if (!req.count("params"))
+	{
+		ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_INVALID_PARAMS, "params are required for this method", id)));
+		return;
+	}
+	const auto params = req["params"].get<std::vector<std::string>>();
+
+	if (params.size() != 2)
+	{
+		ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_INVALID_PARAMS, "this method expects 2 params", id)));
+		return;
+	}
+
+	const DWORD address = utils::hex_string_to_dword(params[0]);
+	const auto bytes = utils::hex_string_to_bytes(params[1]);
+	memcpy_s(reinterpret_cast<void*>(address), bytes.size(), &bytes[0], bytes.size());
+
+	ws.write(boost::asio::buffer(jsonrpc::rpc_result(bytes.size(), id)));
+}
+
 
 const std::map<std::string, message_handler> message_handler_map
 {
@@ -127,7 +174,9 @@ const std::map<std::string, message_handler> message_handler_map
 	std::make_pair("poke", &rpc_poke<BYTE>),
 	std::make_pair("pokew", &rpc_poke<WORD>),
 	std::make_pair("poked", &rpc_poke<DWORD>),
-	std::make_pair("ntpvm", &rpc_ntpvm)
+	std::make_pair("ntpvm", &rpc_ntpvm),
+	std::make_pair("read", &rpc_read),
+	std::make_pair("write", &rpc_write)
 };
 
 void handle_message(websocket::stream<tcp::socket>& ws, boost::beast::multi_buffer& buffer)
