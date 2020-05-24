@@ -4,6 +4,7 @@
 #include "jsonrpc.hpp"
 #include "utils.hpp"
 #include "memory.h"
+#include "protocol.h"
 
 using namespace devtale;
 
@@ -163,6 +164,44 @@ void rpc_write(websocket::stream<tcp::socket>& ws, json req, json::value_type id
 	ws.write(boost::asio::buffer(jsonrpc::rpc_result(utils::dword_to_hex_string(bytes.size()), id)));
 }
 
+void rpc_psend(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
+{
+	if (!req.count("params"))
+	{
+		ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_INVALID_PARAMS, "params are required for this method", id)));
+		return;
+	}
+	const auto params = req["params"].get<std::vector<std::string>>();
+
+	if (params.size() != 1)
+	{
+		ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_INVALID_PARAMS, "this method expects 1 param", id)));
+		return;
+	}
+
+	protocol::get()->send(params[0]);
+	ws.write(boost::asio::buffer(jsonrpc::rpc_result(utils::dword_to_hex_string(params[0].size()), id)));
+}
+
+void rpc_precv(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
+{
+	if (!req.count("params"))
+	{
+		ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_INVALID_PARAMS, "params are required for this method", id)));
+		return;
+	}
+	const auto params = req["params"].get<std::vector<std::string>>();
+
+	if (params.size() != 1)
+	{
+		ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_INVALID_PARAMS, "this method expects 1 param", id)));
+		return;
+	}
+
+	protocol::get()->receive(params[0]);
+	ws.write(boost::asio::buffer(jsonrpc::rpc_result(utils::dword_to_hex_string(params[0].size()), id)));
+}
+
 
 const std::map<std::string, message_handler> message_handler_map
 {
@@ -176,7 +215,9 @@ const std::map<std::string, message_handler> message_handler_map
 	std::make_pair("poked", &rpc_poke<DWORD>),
 	std::make_pair("ntpvm", &rpc_ntpvm),
 	std::make_pair("read", &rpc_read),
-	std::make_pair("write", &rpc_write)
+	std::make_pair("write", &rpc_write),
+	std::make_pair("psend", &rpc_psend),
+	std::make_pair("precv", &rpc_precv)
 };
 
 void handle_message(websocket::stream<tcp::socket>& ws, boost::beast::multi_buffer& buffer)
@@ -234,9 +275,13 @@ int main()
 #ifdef _DEBUG
 	CreateDebugWindow();
 #endif
+
 	io_context ioc;
 	websocket::stream<tcp::socket> ws{ ioc };
 	tcp::resolver resolver{ ioc };
+	packet_handler phandler(ws);
+	protocol::get()->set_packet_handler(&phandler);
+	
 	auto const results = resolver.resolve(host, port);
 	while (running) {
 		try {

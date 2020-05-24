@@ -15,6 +15,16 @@ namespace devtale {
 
 		using json = nlohmann::json;
 
+		template <typename T> std::string rpc_call(const std::string& method, T param)
+		{
+			json out = {
+				{"jsonrpc", "2.0"},
+				{"method", method},
+				{"params", param}
+			};
+			return out.dump(4);
+		}
+		
 		template <typename T> std::string rpc_result(T result, const json::value_type &id)
 		{
 			json out = {
@@ -25,7 +35,7 @@ namespace devtale {
 			return out.dump(4);
 		}
 		
-		std::string rpc_error(int error_code, const std::string &message)
+		std::string inline rpc_error(int error_code, const std::string &message)
 		{
 			json out = {
 				{"jsonrpc", "2.0"},
@@ -38,7 +48,7 @@ namespace devtale {
 			return out.dump(4);
 		}
 
-		std::string rpc_error(int error_code, const std::string & message, const json::value_type &id)
+		std::string inline rpc_error(int error_code, const std::string & message, const json::value_type &id)
 		{
 			json out = {
 				{"jsonrpc", "2.0"},
