@@ -88,7 +88,7 @@ template<typename T> void rpc_poke(websocket::stream<tcp::socket>& ws, json req,
 	}
 
 	const DWORD address = utils::hex_string_to_dword(params[0]);
-	const T value = utils::hex_string_to_dword(params[1]);
+	const T value = static_cast<T>(utils::hex_string_to_dword(params[1]));
 	*reinterpret_cast<T*>(address) = value;
 
 	ws.write(boost::asio::buffer(jsonrpc::rpc_result(utils::dword_to_hex_string(sizeof(T)), id)));

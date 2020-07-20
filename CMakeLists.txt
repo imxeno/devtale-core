@@ -5,6 +5,19 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
 endif(MSVC)
 
+macro(get_WIN32_WINNT version)
+    if (WIN32 AND CMAKE_SYSTEM_VERSION)
+        set(ver ${CMAKE_SYSTEM_VERSION})
+        string(REPLACE "." "" ver ${ver})
+        string(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
+
+        set(${version} "0x${ver}")
+    endif()
+endmacro()
+
+get_WIN32_WINNT(ver)
+add_definitions(-D_WIN32_WINNT=${ver})
+
 # boost
 find_package(Boost 1.73 REQUIRED COMPONENTS
              date_time)
@@ -16,8 +29,17 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 include_directories(nlohmann_json)
 add_subdirectory(nlohmann_json)
 
+# project
+
 # target definition
-add_library(devtale-core SHARED devtale-core.cpp memory.cpp ansistring.cpp packet_handler.cpp protocol.cpp)
+add_library(devtale-core SHARED 
+	src/devtale-core.cpp 
+	src/ansistring.cpp
+	src/packet_handler.cpp
+	src/protocol.cpp
+	src/memory.cpp
+ )
+
 target_link_libraries(devtale-core ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
 # target definition
 # add_executable(devtale-core-test devtale-core.cpp memory.cpp protocol.cpp packet_handler.cpp)
