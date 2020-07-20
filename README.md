@@ -6,6 +6,16 @@
 
 A headless implementation of packet tool for NosTale, which can be used for research purposes in scripts or using dedicated GUI. It's based on the original DevTale.
 
+# Cloning the repository
+
+You need to use recursive clone in order to fetch needed dependencies (nlohmann's json library).
+
+```bash
+git clone --recursive git@github.com:xenostale/devtale-core.git
+# or
+git clone --recursive https://github.com/xenostale/devtale-core.git
+```
+
 # Download
 
 You can find the latest .dll release [here.](https://github.com/xenostale/devtale-core/releases/latest) If you are unsure which file to choose, grab the one _Release_ one.
