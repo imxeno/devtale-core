@@ -6,7 +6,7 @@ if(MSVC)
 endif(MSVC)
 
 # boost
-find_package(Boost 1.70 REQUIRED COMPONENTS
+find_package(Boost 1.73 REQUIRED COMPONENTS
              date_time)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})

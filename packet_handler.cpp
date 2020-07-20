@@ -15,9 +15,9 @@ namespace devtale {
 				ws.write(boost::asio::buffer(jsonrpc::rpc_call("psend", packet)));
 			}
 		}
-		catch (boost::system::system_error&)
+		catch (boost::system::system_error& error)
 		{
-			//ignored
+			std::cout << error.what() << std::endl;
 		}
 	}
 
@@ -27,9 +27,9 @@ namespace devtale {
 			if (ws.is_open()) {
 				ws.write(boost::asio::buffer(jsonrpc::rpc_call("precv", packet)));
 			}
-		} catch (boost::system::system_error&)
+		} catch (boost::system::system_error& error)
 		{
-			//ignored
+			std::cout << error.what() << std::endl;
 		}
 	}
 }

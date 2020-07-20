@@ -8,13 +8,15 @@
 
 using namespace devtale;
 
-using tcp = boost::asio::ip::tcp;
-using io_context = boost::asio::io_context;
+namespace beast = boost::beast;
 namespace websocket = boost::beast::websocket;
+namespace net = boost::asio;
+
+using tcp = boost::asio::ip::tcp;
 using json = nlohmann::json;
 
 bool running = true;
-const auto host = "127.0.0.1";
+std::string host = "127.0.0.1";
 const auto port = "17171";
 const auto ws_target = "/";
 
@@ -276,17 +278,24 @@ int main()
 	CreateDebugWindow();
 #endif
 
-	io_context ioc;
-	websocket::stream<tcp::socket> ws{ ioc };
+	net::io_context ioc;
 	tcp::resolver resolver{ ioc };
+	websocket::stream<tcp::socket> ws{ ioc };
+
 	packet_handler phandler(ws);
 	protocol::get()->set_packet_handler(&phandler);
 	
 	auto const results = resolver.resolve(host, port);
+
 	while (running) {
 		try {
-			boost::asio::connect(ws.next_layer(), results.begin(), results.end());
-			ws.handshake(host, ws_target);
+			auto ep = net::connect(ws.next_layer(), results);
+
+			// Update the host_ string. This will provide the value of the
+			// Host HTTP header during the WebSocket handshake.
+			// See https://tools.ietf.org/html/rfc7230#section-5.4
+
+			ws.handshake(host + ':' + std::to_string(ep.port()), ws_target);
 
 			boost::beast::multi_buffer buffer;
 			while (ws.read(buffer))

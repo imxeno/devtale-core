@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/beast/websocket.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <iostream>
 
 namespace devtale
 {
