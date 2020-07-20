@@ -1,0 +1,19 @@
+<div align="center">
+  <img src="/.github/xeno-bogo-nosafezone-4x.png?raw=true" alt="DevTale Core logo" title="DevTale Core" height="150" />
+</div>
+
+# DevTale Core
+
+A headless implementation of packet tool for NosTale, which can be used for research purposes in scripts or using dedicated GUI. It's based on the original DevTale.
+
+# Download
+
+You can find the latest .dll release [here.](https://github.com/xenostale/devtale-core/releases/latest) If you are unsure which file to choose, grab the one _Release_ one.
+
+## Asking about a VirusTotal link?
+
+Come on, the source is available, go and check it yourself.
+
+# License
+
+Copyright &copy; 2020 Piotr "Xeno" Adamczyk
