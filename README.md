@@ -18,7 +18,7 @@ git clone --recursive https://github.com/xenostale/devtale-core.git
 
 # Download
 
-You can find the latest .dll release [here.](https://github.com/xenostale/devtale-core/releases/latest) If you are unsure which file to choose, grab the one _Release_ one.
+You can find the latest .dll release [here.](https://github.com/xenostale/devtale-core/releases/latest) If you are unsure which file to choose, grab the _Release_ one.
 
 ## Asking about a VirusTotal link?
 
