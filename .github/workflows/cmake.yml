@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup BOOST_ROOT
-        run: echo "BOOST_ROOT=${BOOST_ROOT_1_72_0}" >> $env:GITHUB_ENV
+        run: echo "BOOST_ROOT=${env:BOOST_ROOT_1_72_0}" >> $env:GITHUB_ENV
 
       - name: Create Build Environment
         # Some projects don't allow in-source building, so create a separate build directory
