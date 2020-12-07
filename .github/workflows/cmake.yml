@@ -19,6 +19,10 @@ jobs:
         with:
           submodules: true
 
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
       - name: Setup BOOST_ROOT
         run: echo "BOOST_ROOT=${env:BOOST_ROOT_1_72_0}" >> $env:GITHUB_ENV
 
