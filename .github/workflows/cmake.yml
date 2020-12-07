@@ -22,6 +22,32 @@ jobs:
       # We'll use this as our working directory for all subsequent commands
       run: cmake -E make_directory ${{runner.workspace}}/build
 
+    - name: Download Boost
+        shell: powershell
+        run: |
+          $uri = 'https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.zip'
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Invoke-WebRequest -Uri $uri -OutFile C:\boost.zip -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome
+
+    - name: Unzip boost
+      run: Expand-Archive -LiteralPath 'C:\boost.zip' -DestinationPath C:\install\
+
+    - name: Run bootstrap
+      shell: powershell
+      run: |
+        cd C:\install\boost_1_73_0\tools\build\
+        .\bootstrap.bat
+
+    - name: Install Boost
+      continue-on-error: true
+      shell: powershell
+      run: |
+        cd C:\install\boost_1_73_0\tools\build\
+        .\b2 --build-type=complete -j2 --prefix="C:\boost-build" install
+        $env:Path += ";C:\boost-build\bin"
+        cd C:\install\boost_1_73_0
+        C:\boost-build\bin\b2.exe --build-type=complete -j2 --build-dir="C:\install\boost_1_73_0\build" --build-type=complete --prefix="C:\boost" install
+
     - name: Configure CMake
       # Use a bash shell so we can use the same syntax for environment variable
       # access regardless of the host operating system
@@ -30,7 +56,7 @@ jobs:
       # Note the current convention is to use the -S and -B options here to specify source 
       # and build directories, but this is only available with CMake 3.13 and higher.  
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 16 2019" -A Win32
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
