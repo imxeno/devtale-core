@@ -56,8 +56,8 @@ jobs:
         with:
           name: devtale-core-debug
           path: |
-            ${{runner.workspace}}/build/${{env.DEBUG_BUILD_DIRNAME}}/devtale-core.dll
-            ${{runner.workspace}}/build/${{env.DEBUG_BUILD_DIRNAME}}/devtale-core.pdb
+            ${{runner.workspace}}/${{env.DEBUG_BUILD_DIRNAME}}/devtale-core.dll
+            ${{runner.workspace}}/${{env.DEBUG_BUILD_DIRNAME}}/devtale-core.pdb
 
       - name: Create Release Build Environment
         # Some projects don't allow in-source building, so create a separate build directory
@@ -89,4 +89,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: devtale-core-release
-          path: ${{runner.workspace}}/build/${{env.RELEASE_BUILD_DIRNAME}}/devtale-core.dll
+          path: ${{runner.workspace}}/${{env.RELEASE_BUILD_DIRNAME}}/devtale-core.dll
