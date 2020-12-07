@@ -4,9 +4,9 @@
 
 # DevTale Core
 
-![Build](https://github.com/xenostale/devtale-core/workflows/Build/badge.svg)
-
 A headless implementation of packet tool for NosTale, which can be used for research purposes in scripts or using dedicated GUI. It's based on the original DevTale.
+
+![Build](https://github.com/xenostale/devtale-core/workflows/Build/badge.svg)
 
 # Cloning the repository
 
