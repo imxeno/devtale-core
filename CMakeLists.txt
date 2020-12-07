@@ -19,8 +19,7 @@ get_WIN32_WINNT(ver)
 add_definitions(-D_WIN32_WINNT=${ver})
 
 # boost
-find_package(Boost 1.73 REQUIRED COMPONENTS
-             date_time)
+find_package(Boost 1.72 REQUIRED COMPONENTS date_time)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
@@ -41,6 +40,3 @@ add_library(devtale-core SHARED
  )
 
 target_link_libraries(devtale-core ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
-# target definition
-# add_executable(devtale-core-test devtale-core.cpp memory.cpp protocol.cpp packet_handler.cpp)
-#target_link_libraries(devtale-core-test ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
