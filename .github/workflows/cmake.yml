@@ -30,6 +30,7 @@ jobs:
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
         run: |
           BOOST_ROOT=${env:BOOST_ROOT_1_72_0}
+          echo $BOOST_ROOT
           cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: Build
