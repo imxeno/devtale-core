@@ -5,7 +5,7 @@ on: [push]
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  BOOST_ROOT: ${{ BOOST_ROOT_1_72_0 }}
+  BOOST_ROOT: ${{ env.BOOST_ROOT_1_72_0 }}
 
 jobs:
   build:
