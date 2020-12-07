@@ -77,7 +77,7 @@ jobs:
         working-directory: ${{runner.workspace}}/${{env.RELEASE_BUILD_DIRNAME}}
         shell: bash
         # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: cmake --build . --config $BUILD_TYPE
+        run: cmake --build . --config $RELEASE_BUILD_TYPE
 
       - name: Test Release Build
         working-directory: ${{runner.workspace}}/${{env.RELEASE_BUILD_DIRNAME}}
