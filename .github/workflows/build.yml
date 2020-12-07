@@ -3,6 +3,7 @@ name: Build
 on: [push]
 
 env:
+  MSVC_DEV_CMD_ARCH: x86
   CMAKE_ARCH: Win32
   DEBUG_BUILD_TYPE: Debug
   DEBUG_BUILD_DIRNAME: build_debug
@@ -20,7 +21,7 @@ jobs:
 
       - uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x86
+          arch: ${{env.MSVC_DEV_CMD_ARCH}}
 
       - name: Setup Boost Root
         run: echo "BOOST_ROOT=${env:BOOST_ROOT_1_72_0}" >> $env:GITHUB_ENV
