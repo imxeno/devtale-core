@@ -5,8 +5,12 @@
 #include "utils.hpp"
 #include "memory.h"
 #include "protocol.h"
+#include "resource.h"
 
 using namespace devtale;
+
+#define DEVTALE_INSECURE false
+#define EXTERN_DLL_EXPORT extern "C" __declspec(dllexport)
 
 namespace beast = boost::beast;
 namespace websocket = boost::beast::websocket;
@@ -19,6 +23,7 @@ bool running = true;
 std::string host = "127.0.0.1";
 const auto port = "17171";
 const auto ws_target = "/";
+HINSTANCE h_instance;
 
 typedef void (*message_handler)(websocket::stream<tcp::socket>& ws, json req, json::value_type id);
 
@@ -27,6 +32,8 @@ void rpc_ping(websocket::stream<tcp::socket> &ws, json req, json::value_type id)
 {
 	ws.write(boost::asio::buffer(jsonrpc::rpc_result("pong", id)));
 }
+
+#if DEVTALE_INSECURE
 
 void rpc_scan(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
 {
@@ -166,6 +173,13 @@ void rpc_write(websocket::stream<tcp::socket>& ws, json req, json::value_type id
 	ws.write(boost::asio::buffer(jsonrpc::rpc_result(utils::dword_to_hex_string(bytes.size()), id)));
 }
 
+#else
+void rpc_disabled_method(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
+{
+	ws.write(boost::asio::buffer(jsonrpc::rpc_error(JRPCERR_METHOD_DISABLED, "this method is not available in a secure build", id)));
+}
+#endif
+
 void rpc_psend(websocket::stream<tcp::socket>& ws, json req, json::value_type id)
 {
 	if (!req.count("params"))
@@ -208,6 +222,7 @@ void rpc_precv(websocket::stream<tcp::socket>& ws, json req, json::value_type id
 const std::map<std::string, message_handler> message_handler_map
 {
 	std::make_pair("ping", &rpc_ping),
+#if DEVTALE_INSECURE
 	std::make_pair("scan", &rpc_scan),
 	std::make_pair("peek", &rpc_peek<BYTE>),
 	std::make_pair("peekw", &rpc_peek<WORD>),
@@ -218,6 +233,18 @@ const std::map<std::string, message_handler> message_handler_map
 	std::make_pair("ntpvm", &rpc_ntpvm),
 	std::make_pair("read", &rpc_read),
 	std::make_pair("write", &rpc_write),
+#else
+	std::make_pair("scan", &rpc_disabled_method),
+	std::make_pair("peek", &rpc_disabled_method),
+	std::make_pair("peekw", &rpc_disabled_method),
+	std::make_pair("peekd", &rpc_disabled_method),
+	std::make_pair("poke", &rpc_disabled_method),
+	std::make_pair("pokew", &rpc_disabled_method),
+	std::make_pair("poked", &rpc_disabled_method),
+	std::make_pair("ntpvm", &rpc_disabled_method),
+	std::make_pair("read", &rpc_disabled_method),
+	std::make_pair("write", &rpc_disabled_method),
+#endif
 	std::make_pair("psend", &rpc_psend),
 	std::make_pair("precv", &rpc_precv)
 };
@@ -313,6 +340,105 @@ int main()
 	}
 }
 
+// EWSF.EWS entry point
+
+static const char *window_class_name = "devtale-core";
+HWND splash_window;
+bool splash_visible = false;
+
+LRESULT CALLBACK wnd_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	PAINTSTRUCT ps;
+	HDC hdc;
+
+	switch (message)
+	{
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+
+	return 0;
+}
+
+void splash()
+{
+	splash_visible = true;
+	WNDCLASSEX window_class;
+	HBITMAP h_splash = LoadBitmap(h_instance, MAKEINTRESOURCE(IDB_SPLASH));
+	BITMAP splash;
+	GetObject(h_splash, sizeof(BITMAP), &splash);
+
+	window_class.cbSize = sizeof(WNDCLASSEX);
+	window_class.style = CS_HREDRAW | CS_VREDRAW;
+	window_class.lpfnWndProc = wnd_proc;
+	window_class.cbClsExtra = 0;
+	window_class.cbWndExtra = 0;
+	window_class.hInstance = h_instance;
+	window_class.hIcon = LoadIcon(h_instance, MAKEINTRESOURCE(IDI_APPLICATION));
+	window_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	window_class.hbrBackground = CreatePatternBrush(h_splash);
+	window_class.lpszMenuName = nullptr;
+	window_class.lpszClassName = window_class_name;
+	window_class.hIconSm = LoadIcon(window_class.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+
+
+	if (!RegisterClassEx(&window_class))
+	{
+		return;
+	}
+
+	RECT desktop;
+	const HWND hDesktop = GetDesktopWindow();
+	GetWindowRect(hDesktop, &desktop);
+
+	splash_window = CreateWindowA(
+		window_class_name,
+		"DevTale Core",
+		WS_POPUP,
+		(desktop.right - splash.bmWidth) / 2, (desktop.bottom - splash.bmHeight) / 2,
+		splash.bmWidth, splash.bmHeight,
+		NULL,
+		NULL,
+		h_instance,
+		NULL
+	);
+
+	if (!splash_window)
+	{
+		return;
+	}
+
+	ShowWindow(splash_window, SW_SHOW);
+	UpdateWindow(splash_window);
+
+	while (splash_visible)
+		Sleep(10);
+
+	DestroyWindow(splash_window);
+	UnregisterClass(window_class_name, h_instance);
+}
+
+EXTERN_DLL_EXPORT void ShowNostaleSplash()
+{
+	if (splash_visible) return;
+	std::thread splash_thread(&splash);
+	splash_thread.detach();
+}
+
+EXTERN_DLL_EXPORT void FreeNostaleSplash()
+{
+	splash_visible = false;
+}
+
+// DLL Injection entry point
+
 // ReSharper disable once CppInconsistentNaming
 bool WINAPI DllMain(_In_ HINSTANCE instance, _In_ DWORD call_reason, _In_ LPVOID reserved)
 {
@@ -323,8 +449,9 @@ bool WINAPI DllMain(_In_ HINSTANCE instance, _In_ DWORD call_reason, _In_ LPVOID
 	{
 	case DLL_PROCESS_ATTACH:
 		{
-			std::thread main_thread(main);
-			main_thread.detach();
+		h_instance = instance;
+		std::thread main_thread(main);
+		main_thread.detach();
 		}
 		break;
 	case DLL_THREAD_ATTACH:
