@@ -123,7 +123,7 @@ bool WINAPI DllMain(_In_ HINSTANCE instance, _In_ DWORD call_reason, _In_ LPVOID
 		while (true) {
 			std::string port_string = InputBox(
 				"Please input a port which DevTale Core should try to connect "
-				"to click Cancel to skip injecting it for this NosTale instance.",
+				"to or click Cancel to skip injecting it for this NosTale instance.",
 				devtale_title, "17171");
 			if(port_string.empty())
 			{
