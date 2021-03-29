@@ -9,7 +9,6 @@ env:
   DEBUG_BUILD_DIRNAME: build_debug
   RELEASE_BUILD_TYPE: Release
   RELEASE_BUILD_DIRNAME: build_release
-  BOOST_INSTALL_DIR: ${{github.workspace}}/boost
 
 jobs:
   build:
@@ -28,7 +27,7 @@ jobs:
         uses: actions/cache@v2
         id: cache-boost
         with:
-          path: ${{env.BOOST_INSTALL_DIR}}
+          path: ${{env.GITHUB_WORKSPACE}}/boost
           key: boost
 
       - name: Install boost
@@ -38,7 +37,7 @@ jobs:
         with:
           boost_version: 1.73.0
           toolset: msvc14.2
-          boost_install_dir: ${{env.BOOST_INSTALL_DIR}}
+          boost_install_dir: ${{env.GITHUB_WORKSPACE}}
 
       - name: Create Debug Build Environment
         # Some projects don't allow in-source building, so create a separate build directory
