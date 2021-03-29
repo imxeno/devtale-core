@@ -5,12 +5,10 @@
 #include "utils.hpp"
 #include "memory.h"
 #include "protocol.h"
-#include "resource.h"
 
 using namespace devtale;
 
 #define DEVTALE_INSECURE false
-#define EXTERN_DLL_EXPORT extern "C" __declspec(dllexport)
 
 namespace beast = boost::beast;
 namespace websocket = boost::beast::websocket;
@@ -318,10 +316,6 @@ int main()
 		try {
 			auto ep = net::connect(ws.next_layer(), results);
 
-			// Update the host_ string. This will provide the value of the
-			// Host HTTP header during the WebSocket handshake.
-			// See https://tools.ietf.org/html/rfc7230#section-5.4
-
 			ws.handshake(host + ':' + std::to_string(ep.port()), ws_target);
 
 			boost::beast::multi_buffer buffer;
@@ -338,103 +332,6 @@ int main()
 			Sleep(1000);
 		}
 	}
-}
-
-// EWSF.EWS entry point
-
-static const char *window_class_name = "devtale-core";
-HWND splash_window;
-bool splash_visible = false;
-
-LRESULT CALLBACK wnd_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	PAINTSTRUCT ps;
-	HDC hdc;
-
-	switch (message)
-	{
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		EndPaint(hWnd, &ps);
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-
-	return 0;
-}
-
-void splash()
-{
-	splash_visible = true;
-	WNDCLASSEX window_class;
-	HBITMAP h_splash = LoadBitmap(h_instance, MAKEINTRESOURCE(IDB_SPLASH));
-	BITMAP splash;
-	GetObject(h_splash, sizeof(BITMAP), &splash);
-
-	window_class.cbSize = sizeof(WNDCLASSEX);
-	window_class.style = CS_HREDRAW | CS_VREDRAW;
-	window_class.lpfnWndProc = wnd_proc;
-	window_class.cbClsExtra = 0;
-	window_class.cbWndExtra = 0;
-	window_class.hInstance = h_instance;
-	window_class.hIcon = LoadIcon(h_instance, MAKEINTRESOURCE(IDI_APPLICATION));
-	window_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	window_class.hbrBackground = CreatePatternBrush(h_splash);
-	window_class.lpszMenuName = nullptr;
-	window_class.lpszClassName = window_class_name;
-	window_class.hIconSm = LoadIcon(window_class.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
-
-
-	if (!RegisterClassEx(&window_class))
-	{
-		return;
-	}
-
-	RECT desktop;
-	const HWND hDesktop = GetDesktopWindow();
-	GetWindowRect(hDesktop, &desktop);
-
-	splash_window = CreateWindowA(
-		window_class_name,
-		"DevTale Core",
-		WS_POPUP,
-		(desktop.right - splash.bmWidth) / 2, (desktop.bottom - splash.bmHeight) / 2,
-		splash.bmWidth, splash.bmHeight,
-		NULL,
-		NULL,
-		h_instance,
-		NULL
-	);
-
-	if (!splash_window)
-	{
-		return;
-	}
-
-	ShowWindow(splash_window, SW_SHOW);
-	UpdateWindow(splash_window);
-
-	while (splash_visible)
-		Sleep(10);
-
-	DestroyWindow(splash_window);
-	UnregisterClass(window_class_name, h_instance);
-}
-
-EXTERN_DLL_EXPORT void ShowNostaleSplash()
-{
-	if (splash_visible) return;
-	std::thread splash_thread(&splash);
-	splash_thread.detach();
-}
-
-EXTERN_DLL_EXPORT void FreeNostaleSplash()
-{
-	splash_visible = false;
 }
 
 // DLL Injection entry point

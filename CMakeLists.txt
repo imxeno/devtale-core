@@ -52,7 +52,15 @@ add_library(devtale-core SHARED
 	src/ansistring.cpp
 	src/packet_handler.cpp
 	src/protocol.cpp
-	src/memory.cpp
-    "src/devtale-core.rc")
-
+	src/memory.cpp)
+    
 target_link_libraries(devtale-core ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
+
+add_library(EWSF SHARED 
+    "src/devtale-core.rc" "src/loader.cpp")
+
+set_target_properties(
+    EWSF
+    PROPERTIES 
+        SUFFIX ".EWS"
+)
