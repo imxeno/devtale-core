@@ -3,7 +3,7 @@
 // Used by devtale-core.rc
 //
 
-#define IDB_SPLASH 101
+#define IDB_SPLASH 1337
 
 // Next default values for new objects
 // 

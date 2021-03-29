@@ -1,5 +1,8 @@
-#include <thread>
 #include <Windows.h>
+#include <string>
+#include <thread>
+
+#include "inputbox.h"
 #include "resource.h"
 
 #define EXTERN_DLL_EXPORT extern "C" __declspec(dllexport)
@@ -80,10 +83,12 @@ void splash()
 	}
 
 	ShowWindow(splash_window, SW_SHOW);
-	UpdateWindow(splash_window);
 
 	while (splash_visible)
+	{
 		Sleep(10);
+		UpdateWindow(splash_window);
+	}
 
 	DestroyWindow(splash_window);
 	UnregisterClass(window_class_name, h_instance);
@@ -105,20 +110,38 @@ EXTERN_DLL_EXPORT void FreeNostaleSplash()
 	splash_thread.join();
 }
 
+const char* devtale_title = "DevTale Core Injector";
+
 // ReSharper disable once CppInconsistentNaming
 bool WINAPI DllMain(_In_ HINSTANCE instance, _In_ DWORD call_reason, _In_ LPVOID reserved)
 {
-	UNUSED(instance);
 	UNUSED(reserved);
 
-	switch (call_reason)
+	if(call_reason == DLL_PROCESS_ATTACH)
 	{
-	case DLL_PROCESS_ATTACH:
 		h_instance = instance;
-		LoadLibraryA("devtale-core.dll");
-		break;
-	default:
-		break;
+		while (true) {
+			std::string port_string = InputBox(
+				"Please input a port which DevTale Core should try to connect "
+				"to click Cancel to skip injecting it for this NosTale instance.",
+				devtale_title, "17171");
+			if(port_string.empty())
+			{
+				MessageBoxA(nullptr, "DevTale Core will not be injected.", devtale_title, MB_OK);
+				break;
+			}
+
+			int port = atol(port_string.c_str());
+			if(port < 0 || port > USHRT_MAX)
+			{
+				MessageBoxA(nullptr, "Incorrect port value, try again.", devtale_title, MB_OK);
+				continue;
+			}
+			SetEnvironmentVariable("devtale_port", std::to_string(port).c_str());
+			LoadLibraryA("devtale-core.dll");
+			break;
+		}
 	}
+
 	return TRUE;
 }

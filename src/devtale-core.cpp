@@ -19,7 +19,6 @@ using json = nlohmann::json;
 
 bool running = true;
 std::string host = "127.0.0.1";
-const auto port = "17171";
 const auto ws_target = "/";
 HINSTANCE h_instance;
 
@@ -309,6 +308,18 @@ int main()
 
 	packet_handler phandler(ws);
 	protocol::get()->set_packet_handler(&phandler);
+
+	auto port = std::string("17171");
+
+	// Port override
+	{
+		std::vector<char> temp_port(6);
+		int r = GetEnvironmentVariable("devtale_port", &temp_port[0], 6);
+		if(r != 0)
+		{
+			port = std::string(&temp_port[0]);
+		}
+	}
 	
 	auto const results = resolver.resolve(host, port);
 

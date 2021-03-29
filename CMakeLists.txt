@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12)
 project(devtale-core)
 
 if(NOT "${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
@@ -56,8 +56,10 @@ add_library(devtale-core SHARED
     
 target_link_libraries(devtale-core ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
 
+# loader
+
 add_library(EWSF SHARED 
-    "src/devtale-core.rc" "src/loader.cpp")
+    "src/loader.cpp" "src/loader.rc"  "src/inputbox.h" "src/inputbox.cpp")
 
 set_target_properties(
     EWSF
