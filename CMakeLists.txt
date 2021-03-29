@@ -35,7 +35,7 @@ if(WIN32)
 endif()
 
 # boost
-find_package(Boost REQUIRED COMPONENTS date_time)
+find_package(Boost 1.72 REQUIRED COMPONENTS date_time)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
