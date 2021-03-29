@@ -9,7 +9,7 @@ env:
   DEBUG_BUILD_DIRNAME: build_debug
   RELEASE_BUILD_TYPE: Release
   RELEASE_BUILD_DIRNAME: build_release
-  BOOST_INSTALL_DIR: ${{github.workspace}}/3rdparty/boost
+  BOOST_INSTALL_DIR: ${{github.workspace}}/boost
 
 jobs:
   build:
