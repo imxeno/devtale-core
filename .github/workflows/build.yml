@@ -23,8 +23,11 @@ jobs:
         with:
           arch: ${{env.MSVC_DEV_CMD_ARCH}}
 
-      - name: Setup Boost Root
-        run: echo "BOOST_ROOT=${env:BOOST_ROOT_1_72_0}" >> $env:GITHUB_ENV
+      - name: Install boost
+        uses: MarkusJx/install-boost@v1.0.1
+        id: install-boost
+        with:
+          boost_version: 1.73.0
 
       - name: Create Debug Build Environment
         # Some projects don't allow in-source building, so create a separate build directory
@@ -38,6 +41,8 @@ jobs:
         # and build directories, but this is only available with CMake 3.13 and higher.
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{env.DEBUG_BUILD_TYPE}} -A ${{env.CMAKE_ARCH}}
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
 
       - name: Build Debug
         working-directory: ${{runner.workspace}}/${{env.DEBUG_BUILD_DIRNAME}}
@@ -72,7 +77,9 @@ jobs:
         # and build directories, but this is only available with CMake 3.13 and higher.
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{env.RELEASE_BUILD_TYPE}} -A ${{env.CMAKE_ARCH}}
-
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          
       - name: Build Release
         working-directory: ${{runner.workspace}}/${{env.RELEASE_BUILD_DIRNAME}}
         shell: bash
