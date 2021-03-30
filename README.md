@@ -28,4 +28,4 @@ Come on, the source is available, go and check it yourself.
 
 # License
 
-Copyright &copy; 2020 Piotr "Xeno" Adamczyk
+Copyright &copy; 2021 Piotr "Xeno" Adamczyk
