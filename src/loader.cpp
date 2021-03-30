@@ -112,6 +112,12 @@ EXTERN_DLL_EXPORT void FreeNostaleSplash()
 
 const char* devtale_title = "DevTale Core Injector";
 
+bool is_number(const std::string& s)
+{
+	return !s.empty() && std::find_if(s.begin(),
+		s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+}
+
 // ReSharper disable once CppInconsistentNaming
 bool WINAPI DllMain(_In_ HINSTANCE instance, _In_ DWORD call_reason, _In_ LPVOID reserved)
 {
@@ -132,7 +138,7 @@ bool WINAPI DllMain(_In_ HINSTANCE instance, _In_ DWORD call_reason, _In_ LPVOID
 			}
 
 			int port = atol(port_string.c_str());
-			if(port < 0 || port > USHRT_MAX)
+			if(!is_number(port_string) || port < 0 || port > USHRT_MAX)
 			{
 				MessageBoxA(nullptr, "Incorrect port value, try again.", devtale_title, MB_OK);
 				continue;
