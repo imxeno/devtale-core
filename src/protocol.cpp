@@ -3,6 +3,9 @@
 #include <iostream>
 #include "ansistring.h"
 
+using boost::locale::conv::to_utf;
+using boost::locale::conv::from_utf;
+
 namespace devtale
 {
 	protocol::protocol()
@@ -55,25 +58,14 @@ namespace devtale
 
 	void __stdcall protocol::on_packet_send(char* packet)
 	{
-		const std::string ps(&to_utf8(packet)[0]);
+		const std::string ps(to_utf<char>(packet, "Windows-1250"));
 		get()->handler_->on_packet_send(ps);
 	}
 
 	void __stdcall protocol::on_packet_receive(char* packet)
 	{
-		const std::string ps(&to_utf8(packet)[0]);
+		const std::string ps(to_utf<char>(packet, "Windows-1250"));
 		get()->handler_->on_packet_receive(ps);
-	}
-
-	std::vector<char> protocol::to_utf8(char* packet)
-	{
-		const auto wbuffer_size = MultiByteToWideChar(1250, 0, packet, -1, nullptr, 0);
-		std::vector<wchar_t> wbuffer(wbuffer_size);
-		MultiByteToWideChar(1250, 0, packet, -1, &wbuffer[0], wbuffer_size);
-		const auto buffer_size = WideCharToMultiByte(CP_UTF8, 0, &wbuffer[0], wbuffer_size, nullptr, 0, 0, nullptr);
-		std::vector<char> buffer(buffer_size);
-		WideCharToMultiByte(CP_UTF8, 0, &wbuffer[0], wbuffer_size, &buffer[0], buffer_size, 0, nullptr);
-		return std::move(buffer);
 	}
 
 	void protocol::send(char* packet) const
@@ -123,18 +115,20 @@ namespace devtale
 
 	void protocol::send(const std::string& packet) const
 	{
-		const auto size = packet.length() + 1;
+		const auto encoded_packet = from_utf(packet, "Windows-1250");
+		const auto size = encoded_packet.length() + 1;
 		const auto str = new char[size];
-		strcpy_s(str, size, packet.c_str());
+		strcpy_s(str, size, encoded_packet.c_str());
 		send(str);
 		delete[] str;
 	}
 
 	void protocol::receive(const std::string& packet) const
 	{
-		const auto size = packet.length() + 1;
+		const auto encoded_packet = from_utf(packet, "Windows-1250");
+		const auto size = encoded_packet.length() + 1;
 		const auto str = new char[size];
-		strcpy_s(str, size, packet.c_str());
+		strcpy_s(str, size, encoded_packet.c_str());
 		receive(str);
 		delete[] str;
 	}

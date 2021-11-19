@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/locale.hpp>
 
 #include "packet_handler.h"
 
