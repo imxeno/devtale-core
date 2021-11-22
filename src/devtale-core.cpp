@@ -12,7 +12,7 @@ using namespace devtale;
 
 namespace beast = boost::beast;
 namespace websocket = boost::beast::websocket;
-namespace net = boost::asio;
+namespace asio = boost::asio;
 
 using tcp = boost::asio::ip::tcp;
 using json = nlohmann::json;
@@ -302,7 +302,7 @@ int main()
 	CreateDebugWindow();
 #endif
 
-	net::io_context ioc;
+	asio::io_context ioc;
 	tcp::resolver resolver{ ioc };
 	websocket::stream<tcp::socket> ws{ ioc };
 
@@ -325,7 +325,7 @@ int main()
 
 	while (running) {
 		try {
-			auto ep = net::connect(ws.next_layer(), results);
+			auto ep = asio::connect(ws.next_layer(), results);
 
 			ws.handshake(host + ':' + std::to_string(ep.port()), ws_target);
 

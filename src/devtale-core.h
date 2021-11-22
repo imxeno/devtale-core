@@ -10,8 +10,7 @@
 #include <boost/beast/websocket.hpp>
 #include <boost/algorithm/algorithm.hpp>
 #include <boost/algorithm/hex.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio.hpp>
 #include <boost/format.hpp>
 #include <nlohmann/json.hpp>
 
