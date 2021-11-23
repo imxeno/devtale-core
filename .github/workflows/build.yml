@@ -34,7 +34,7 @@ jobs:
         if: steps.cache-boost.outputs.cache-hit != 'true'
         shell: powershell
         run: |
-          $Url = "https://sourceforge.net/projects/boost/files/boost-binaries/1.73.0/boost_1_73_0-msvc-14.2-32.exe"
+          $Url = "https://sourceforge.net/projects/boost/files/boost-binaries/1.77.0/boost_1_77_0-msvc-14.2-32.exe"
           (New-Object System.Net.WebClient).DownloadFile($Url, "$env:TEMP\boost.exe")
           Start-Process -Wait -FilePath "$env:TEMP\boost.exe" "/SILENT","/SP-","/SUPPRESSMSGBOXES","/DIR=${{github.workspace}}/boost"
 
@@ -88,7 +88,7 @@ jobs:
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{env.RELEASE_BUILD_TYPE}} -A ${{env.CMAKE_ARCH}}
         env:
           BOOST_ROOT: ${{github.workspace}}/boost
-          
+
       - name: Build Release
         working-directory: ${{runner.workspace}}/${{env.RELEASE_BUILD_DIRNAME}}
         shell: bash
