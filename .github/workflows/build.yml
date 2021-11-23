@@ -28,7 +28,7 @@ jobs:
         id: cache-boost
         with:
           path: ${{github.workspace}}/boost
-          key: boost-1730
+          key: boost-1770
 
       - name: Install boost
         if: steps.cache-boost.outputs.cache-hit != 'true'
