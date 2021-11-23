@@ -52,7 +52,9 @@ add_library(devtale-core SHARED
 	src/ansistring.cpp
 	src/packet_handler.cpp
 	src/protocol.cpp
-	src/memory.cpp)
+	src/memory.cpp
+    "src/websocket_handler.cpp"
+ "src/utils.cpp")
     
 target_link_libraries(devtale-core ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
 
