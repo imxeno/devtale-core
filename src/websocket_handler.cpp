@@ -76,14 +76,16 @@ namespace devtale {
 	}
 
 	void websocket_handler::read() {
-		boost::beast::multi_buffer buffer;
-		ws_.async_read(buffer, asio::bind_executor(strand_, [&](error_code error, std::size_t bytes_transferred)
+		read_buffer_ = boost::beast::multi_buffer();
+		ws_.async_read(read_buffer_, asio::bind_executor(strand_, [&](error_code error, std::size_t bytes_transferred)
 		{
+				std::cout << bytes_transferred << std::endl;
 			if (error) {
 				handle_error(error);
 				return;
 			}
-			handle_message(buffer);
+			handle_message();
+			read();
 		}));
 	}
 
@@ -291,10 +293,9 @@ namespace devtale {
 		write(jsonrpc::rpc_result(utils::dword_to_hex_string(params[0].size()), id));
 	}
 
-	void websocket_handler::handle_message(boost::beast::multi_buffer& buffer)
+	void websocket_handler::handle_message()
 	{
-		std::string raw_json = buffers_to_string(buffer.data());
-		buffer = boost::beast::multi_buffer();
+		std::string raw_json = buffers_to_string(read_buffer_.data());
 		std::cout << raw_json << std::endl;
 
 		try {

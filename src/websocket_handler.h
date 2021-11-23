@@ -26,7 +26,7 @@ namespace devtale {
 		void read();
 		void write(std::string);
 		void handle_error(error_code);
-		void handle_message(boost::beast::multi_buffer& buffer);
+		void handle_message();
 	private:
 		std::string host_ = "127.0.0.1";
 		std::string port_ = "17171";
@@ -36,6 +36,7 @@ namespace devtale {
 		tcp::resolver resolver_;
 		websocket::stream<tcp::socket> ws_;
 		asio::io_context::strand strand_;
+		boost::beast::multi_buffer read_buffer_;
 
 		void rpc_ping(json req, json::value_type id);
 		void rpc_scan(json req, json::value_type id);
