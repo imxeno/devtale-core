@@ -94,7 +94,7 @@ namespace devtale {
 			write_mtx_.lock();
 			try {
 				ws_.write(boost::asio::buffer(s));
-			} catch (std::exception& e) {
+			} catch (std::exception& error) {
 				std::cout << error.what() << std::endl;
 			}
 			write_mtx_.unlock();
