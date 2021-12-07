@@ -92,7 +92,11 @@ namespace devtale {
 	void websocket_handler::write(std::string s) {
 		if (ws_.is_open()) {
 			write_mtx_.lock();
-			ws_.write(boost::asio::buffer(s));
+			try {
+				ws_.write(boost::asio::buffer(s));
+			} catch (std::exception& error) {
+				std::cout << error.what() << std::endl;
+			}
 			write_mtx_.unlock();
 		}
 	}
